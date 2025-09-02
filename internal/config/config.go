@@ -29,6 +29,7 @@ var (
 		Type string
 
 		S3 struct {
+			Bucket    string
 			Endpoint  string
 			AccessKey string
 			SecretKey string

@@ -29,6 +29,7 @@ func getFlags() (list []cli.Flag) {
 	list = append(list, flags.GenericFlags()...)
 	list = append(list, flags.ServerFlags()...)
 	list = append(list, flags.LoggerFlags()...)
+	list = append(list, flags.StorageFlags()...)
 	return
 }
 
