@@ -31,7 +31,7 @@ go.work.sum
 # .idea/
 # .vscode/
 
-config-dev.yaml
+config.yaml
 
 # Folder used by air to store build files
 tmp/
@@ -40,3 +40,4 @@ tmp/
 repositories/
 
 main
+
