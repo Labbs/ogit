@@ -1,0 +1,16 @@
+http:
+  port: 8080
+  logs: true
+logger:
+  level: debug
+  pretty: true
+storage:
+  type: s3 # or local
+  local:
+    path: ./repositories
+  s3:
+    bucket: git
+    endpoint: https://xxxxxxxx.com
+    access-key: xxxxxxxx
+    secret-key: xxxxxxxx
+    region: eu-west-2
