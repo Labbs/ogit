@@ -1,6 +1,10 @@
 http:
   port: 8080
   logs: true
+ssh:
+  enabled: true
+  port: 2222
+  hostkey: ./ssh_host_key
 logger:
   level: debug
   pretty: true
