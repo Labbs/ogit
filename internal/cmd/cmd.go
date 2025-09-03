@@ -7,6 +7,7 @@ import (
 	flags "github.com/labbs/git-server-s3/internal/flags"
 	"github.com/labbs/git-server-s3/internal/server"
 	"github.com/labbs/git-server-s3/pkg/logger"
+	"github.com/labbs/git-server-s3/pkg/storage"
 
 	"github.com/urfave/cli/v3"
 )
@@ -37,10 +38,22 @@ func getFlags() (list []cli.Flag) {
 func runServer(ctx context.Context, c *cli.Command) error {
 	l := logger.NewLogger(config.Logger.Level, config.Logger.Pretty, c.Root().Version)
 
+	str, err := storage.NewGitRepositoryStorage(l)
+	if err != nil {
+		return err
+	}
+
+	// Configure the storage backend
+	if err := str.Configure(); err != nil {
+		l.Fatal().Err(err).Msg("Failed to configure storage")
+		return err
+	}
+
 	var httpConfig server.HttpConfig
 	httpConfig.Port = config.Server.Port
 	httpConfig.HttpLogs = config.Server.HttpLogs
 	httpConfig.Logger = l
+	httpConfig.Storage = str
 
 	httpConfig.NewServer()
 

@@ -3,9 +3,10 @@ package server
 import (
 	"strconv"
 
+	"github.com/labbs/git-server-s3/internal/api/router"
 	"github.com/labbs/git-server-s3/pkg/logger/zerolog"
+	"github.com/labbs/git-server-s3/pkg/storage"
 
-	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/goccy/go-json"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/compress"
@@ -20,7 +21,7 @@ type HttpConfig struct {
 	HttpLogs bool
 	Fiber    *fiber.App
 	Logger   z.Logger
-	S3Client *s3.Client
+	Storage  storage.GitRepositoryStorage
 }
 
 func (c *HttpConfig) Configure() {
@@ -52,7 +53,18 @@ func (c *HttpConfig) Configure() {
 }
 
 func (c *HttpConfig) NewServer() error {
+	c.Configure()
+
+	apirc := router.Config{
+		Logger:  c.Logger,
+		Fiber:   c.Fiber,
+		Storage: c.Storage,
+	}
+
+	apirc.Configure()
+
 	c.Logger.Info().Msgf("Starting server on port %d", c.Port)
+
 	err := c.Fiber.Listen(":" + strconv.Itoa(c.Port))
 	if err != nil {
 		c.Logger.Fatal().Err(err).Msg("Failed to start server")

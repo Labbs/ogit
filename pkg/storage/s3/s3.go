@@ -2,6 +2,7 @@ package s3
 
 import (
 	"context"
+	"os"
 
 	"github.com/labbs/git-server-s3/internal/config"
 
@@ -18,6 +19,10 @@ type S3Config struct {
 }
 
 func (c *S3Config) Configure() error {
+	// Set AWS environment variables to disable automatic checksums for S3-compatible services
+	os.Setenv("AWS_REQUEST_CHECKSUM_CALCULATION", "WHEN_REQUIRED")
+	os.Setenv("AWS_RESPONSE_CHECKSUM_VALIDATION", "WHEN_REQUIRED")
+
 	cfg, err := awsCfg.LoadDefaultConfig(context.TODO(),
 		awsCfg.WithRegion(config.Storage.S3.Region),
 		awsCfg.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(
@@ -25,19 +30,19 @@ func (c *S3Config) Configure() error {
 			config.Storage.S3.SecretKey,
 			"",
 		)),
-		// TODO: Check what is alternative for WithEndpointResolverWithOptions, this function is deprecated
-		awsCfg.WithEndpointResolverWithOptions(aws.EndpointResolverWithOptionsFunc(
-			func(service, region string, options ...interface{}) (aws.Endpoint, error) {
-				return aws.Endpoint{
-					URL:           config.Storage.S3.Endpoint,
-					SigningRegion: region,
-				}, nil
-			})),
 	)
 	if err != nil {
 		c.Logger.Fatal().Err(err).Str("event", "s3.configure.client").Msg("Failed to configure S3 client")
 	}
 
-	c.Client = awss3.NewFromConfig(cfg)
+	// Configure client with custom endpoint and disable checksums for S3-compatible services
+	c.Client = awss3.NewFromConfig(cfg, func(o *awss3.Options) {
+		o.BaseEndpoint = aws.String(config.Storage.S3.Endpoint)
+		o.UsePathStyle = true // Important pour Outscale et autres services S3-compatibles
+		// Disable checksums for S3-compatible services that don't support them
+		o.DisableMultiRegionAccessPoints = true
+		// Disable request and response checksums
+		o.ClientLogMode = 0 // Reduce logging if needed
+	})
 	return nil
 }

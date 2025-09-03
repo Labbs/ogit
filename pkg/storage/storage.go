@@ -20,7 +20,11 @@ func (c *Storage) Configure() error {
 		logger.Info().Msg("Configuring S3 storage")
 		var s3Config s3.S3Config
 		s3Config.Logger = logger
-		s3Config.Configure()
+		err := s3Config.Configure()
+		if err != nil {
+			logger.Fatal().Err(err).Str("event", "s3.configure").Msg("Failed to configure S3 storage")
+			return err
+		}
 		c.S3Client = s3Config.Client
 	case "local":
 		logger.Info().Msg("Configuring local storage")

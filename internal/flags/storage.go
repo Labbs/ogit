@@ -38,21 +38,21 @@ func StorageFlags() []cli.Flag {
 			),
 		},
 		&cli.StringFlag{
-			Name:        "storage.s3.access_key",
+			Name:        "storage.s3.access-key",
 			Aliases:     []string{"ssa"},
 			Destination: &config.Storage.S3.AccessKey,
 			Sources: cli.NewValueSourceChain(
 				cli.EnvVar("STORAGE_S3_ACCESS_KEY"),
-				altsrcyaml.YAML("storage.s3.access_key", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
+				altsrcyaml.YAML("storage.s3.access-key", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
 			),
 		},
 		&cli.StringFlag{
-			Name:        "storage.s3.secret_key",
+			Name:        "storage.s3.secret-key",
 			Aliases:     []string{"sss"},
 			Destination: &config.Storage.S3.SecretKey,
 			Sources: cli.NewValueSourceChain(
 				cli.EnvVar("STORAGE_S3_SECRET_KEY"),
-				altsrcyaml.YAML("storage.s3.secret_key", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
+				altsrcyaml.YAML("storage.s3.secret-key", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
 			),
 		},
 		&cli.StringFlag{
