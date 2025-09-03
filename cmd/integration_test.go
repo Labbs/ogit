@@ -21,31 +21,31 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// TestLocalStorageIntegration teste l'API avec le storage local pour éviter les complications S3
+// TestLocalStorageIntegration tests the API with local storage to avoid S3 complications
 func TestLocalStorageIntegration(t *testing.T) {
-	// Créer un répertoire temporaire pour les tests
+	// Create a temporary directory for tests
 	tempDir, err := os.MkdirTemp("", "git-server-test-*")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
 
-	// Configuration de test avec storage local
+	// Test configuration with local storage
 	config.Storage.Type = "local"
 	config.Storage.Local.Path = tempDir
 
-	// Logger silencieux pour les tests
+	// Silent logger for tests
 	logger := zerolog.New(os.Stderr).Level(zerolog.ErrorLevel)
 
-	// Initialiser le storage local
+	// Initialize local storage
 	localStorage := local.NewLocalStorage(logger)
 	err = localStorage.Configure()
 	require.NoError(t, err)
 
-	// Créer l'app Fiber pour les tests
+	// Create the Fiber app for tests
 	app := fiber.New(fiber.Config{
 		DisableStartupMessage: true,
 	})
 
-	// Configuration des routes
+	// Configure routes
 	routerConfig := &router.Config{
 		Fiber:   app,
 		Logger:  logger,
@@ -54,7 +54,7 @@ func TestLocalStorageIntegration(t *testing.T) {
 	router.NewRepoRouter(routerConfig)
 	router.NewGitRouter(routerConfig)
 
-	// Test 1: Lister les repositories (vide au début)
+	// Test 1: List repositories (empty at start)
 	t.Run("list_empty_repositories", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/repos", nil)
 		resp, err := app.Test(req, 5*1000) // 5 second timeout
@@ -72,7 +72,7 @@ func TestLocalStorageIntegration(t *testing.T) {
 		assert.Empty(t, repos)
 	})
 
-	// Test 2: Créer un nouveau repository
+	// Test 2: Create a new repository
 	var testRepoName = "integration-test-repo"
 	t.Run("create_repository", func(t *testing.T) {
 		reqBody := map[string]string{
@@ -95,12 +95,12 @@ func TestLocalStorageIntegration(t *testing.T) {
 		assert.Equal(t, "repository created", string(body))
 	})
 
-	// Test 3: Vérifier que le repository existe sur le filesystem
+	// Test 3: Verify that the repository exists on the filesystem
 	t.Run("verify_repository_created", func(t *testing.T) {
 		expectedPath := filepath.Join(tempDir, testRepoName+".git")
 		assert.DirExists(t, expectedPath)
 
-		// Vérifier que c'est un repo Git bare
+		// Verify that it's a bare Git repository
 		configPath := filepath.Join(expectedPath, "config")
 		assert.FileExists(t, configPath)
 
@@ -108,7 +108,7 @@ func TestLocalStorageIntegration(t *testing.T) {
 		assert.FileExists(t, headPath)
 	})
 
-	// Test 4: Lister les repositories (maintenant avec le nouveau)
+	// Test 4: List repositories (now with the new one)
 	t.Run("list_repositories_with_new_repo", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/repos", nil)
 		resp, err := app.Test(req, 5*1000)
@@ -128,7 +128,7 @@ func TestLocalStorageIntegration(t *testing.T) {
 		assert.Contains(t, repos, testRepoName+".git")
 	})
 
-	// Test 5: Tester l'endpoint Git info/refs
+	// Test 5: Test the Git info/refs endpoint
 	t.Run("git_info_refs", func(t *testing.T) {
 		url := fmt.Sprintf("/%s.git/info/refs?service=git-upload-pack", testRepoName)
 		req := httptest.NewRequest("GET", url, nil)
@@ -140,13 +140,13 @@ func TestLocalStorageIntegration(t *testing.T) {
 		assert.Equal(t, http.StatusOK, resp.StatusCode)
 		assert.Equal(t, "application/x-git-upload-pack-advertisement", resp.Header.Get("Content-Type"))
 
-		// Le body devrait contenir des données Git protocol
+		// The body should contain Git protocol data
 		body, err := io.ReadAll(resp.Body)
 		require.NoError(t, err)
 		assert.NotEmpty(t, body)
 	})
 
-	// Test 6: Créer un autre repository pour tester la gestion multiple
+	// Test 6: Create another repository to test multiple repository management
 	var secondRepoName = "second-repo"
 	t.Run("create_second_repository", func(t *testing.T) {
 		reqBody := map[string]string{
@@ -165,7 +165,7 @@ func TestLocalStorageIntegration(t *testing.T) {
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
 	})
 
-	// Test 7: Vérifier que les deux repositories apparaissent
+	// Test 7: Verify that both repositories appear
 	t.Run("list_multiple_repositories", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/api/repos", nil)
 		resp, err := app.Test(req, 5*1000)
@@ -187,14 +187,14 @@ func TestLocalStorageIntegration(t *testing.T) {
 	})
 }
 
-// TestErrorCases teste les cas d'erreur
+// TestErrorCases tests error cases
 func TestErrorCases(t *testing.T) {
-	// Créer un répertoire temporaire pour les tests
+	// Create a temporary directory for tests
 	tempDir, err := os.MkdirTemp("", "git-server-error-test-*")
 	require.NoError(t, err)
 	defer os.RemoveAll(tempDir)
 
-	// Configuration de test
+	// Test configuration
 	config.Storage.Type = "local"
 	config.Storage.Local.Path = tempDir
 
@@ -215,7 +215,7 @@ func TestErrorCases(t *testing.T) {
 	router.NewRepoRouter(routerConfig)
 	router.NewGitRouter(routerConfig)
 
-	// Test 1: Requête avec JSON invalide
+	// Test 1: Request with invalid JSON
 	t.Run("invalid_json", func(t *testing.T) {
 		req := httptest.NewRequest("POST", "/api/repo", bytes.NewReader([]byte("invalid json")))
 		req.Header.Set("Content-Type", "application/json")
@@ -227,7 +227,7 @@ func TestErrorCases(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	})
 
-	// Test 2: Créer deux fois le même repository
+	// Test 2: Create the same repository twice
 	t.Run("duplicate_repository", func(t *testing.T) {
 		repoName := "duplicate-repo"
 
@@ -243,7 +243,7 @@ func TestErrorCases(t *testing.T) {
 		resp.Body.Close()
 		assert.Equal(t, http.StatusCreated, resp.StatusCode)
 
-		// Deuxième création (doit échouer)
+		// Second creation (should fail)
 		req = httptest.NewRequest("POST", "/api/repo", bytes.NewReader(bodyBytes))
 		req.Header.Set("Content-Type", "application/json")
 
@@ -251,11 +251,11 @@ func TestErrorCases(t *testing.T) {
 		require.NoError(t, err)
 		defer resp.Body.Close()
 
-		// Devrait retourner une erreur car le repo existe déjà
+		// Should return an error because the repo already exists
 		assert.Equal(t, http.StatusInternalServerError, resp.StatusCode)
 	})
 
-	// Test 3: Accès à un repository qui n'existe pas
+	// Test 3: Access a repository that doesn't exist
 	t.Run("nonexistent_repository", func(t *testing.T) {
 		req := httptest.NewRequest("GET", "/nonexistent-repo.git/info/refs?service=git-upload-pack", nil)
 
@@ -267,7 +267,7 @@ func TestErrorCases(t *testing.T) {
 	})
 }
 
-// BenchmarkAPIEndpoints teste les performances des endpoints principaux
+// BenchmarkAPIEndpoints tests the performance of main endpoints
 func BenchmarkAPIEndpoints(b *testing.B) {
 	tempDir, err := os.MkdirTemp("", "git-server-benchmark-*")
 	require.NoError(b, err)
@@ -293,7 +293,7 @@ func BenchmarkAPIEndpoints(b *testing.B) {
 	router.NewRepoRouter(routerConfig)
 
 	b.Run("ListRepositories", func(b *testing.B) {
-		// Créer quelques repos pour le benchmark
+		// Create a few repositories for the benchmark
 		for i := 0; i < 10; i++ {
 			reqBody := map[string]string{"name": fmt.Sprintf("benchmark-repo-%d", i)}
 			bodyBytes, _ := json.Marshal(reqBody)
