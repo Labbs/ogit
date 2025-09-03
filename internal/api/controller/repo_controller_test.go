@@ -133,8 +133,8 @@ func TestCreateRepoMissingName(t *testing.T) {
 	resp, err := app.Test(req)
 	require.NoError(t, err)
 
-	// Le repository sera créé avec un nom vide, ce qui est techniquement valide
-	// mais sera normalisé par NormalizeRepoPath et échouera au niveau storage
+	// The repository will be created with an empty name, which is technically valid
+	// but will be normalized by NormalizeRepoPath and fail at the storage level
 	assert.Equal(t, fiber.StatusInternalServerError, resp.StatusCode)
 
 	// Verify mock was called
@@ -250,7 +250,7 @@ func TestListReposStorageError(t *testing.T) {
 func TestRepoControllerIntegration(t *testing.T) {
 	app, mockStorage := setupTestApp()
 
-	// Test 1: Lister les repos (vide au début)
+	// Test 1: List repositories (empty at start)
 	mockStorage.On("ListRepositories").Return([]string{}, nil).Once()
 
 	req := httptest.NewRequest("GET", "/api/repos", nil)
@@ -258,7 +258,7 @@ func TestRepoControllerIntegration(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fiber.StatusOK, resp.StatusCode)
 
-	// Test 2: Créer un nouveau repository
+	// Test 2: Create a new repository
 	mockStorage.On("CreateRepository", "integration-test.git").Return(nil).Once()
 
 	reqBody := map[string]string{"name": "integration-test"}
@@ -271,7 +271,7 @@ func TestRepoControllerIntegration(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fiber.StatusCreated, resp.StatusCode)
 
-	// Test 3: Lister les repos (maintenant avec le nouveau)
+	// Test 3: List repositories (now with the new one)
 	mockStorage.On("ListRepositories").Return([]string{"integration-test.git"}, nil).Once()
 
 	req = httptest.NewRequest("GET", "/api/repos", nil)

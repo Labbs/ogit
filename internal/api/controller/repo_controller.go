@@ -1,3 +1,4 @@
+// Package controller provides HTTP handlers for repository management operations.
 package controller
 
 import (
@@ -7,11 +8,20 @@ import (
 	"github.com/rs/zerolog"
 )
 
+// RepoController handles HTTP requests for repository management operations.
+// It provides endpoints for creating and listing Git repositories through
+// the configured storage backend.
 type RepoController struct {
-	Logger  zerolog.Logger
-	Storage storage.GitRepositoryStorage
+	Logger  zerolog.Logger               // Logger for request logging and error reporting
+	Storage storage.GitRepositoryStorage // Storage backend for repository operations
 }
 
+// CreateRepo handles POST requests to create a new Git repository.
+// It expects a JSON payload with a "name" field and creates a bare repository
+// in the configured storage backend.
+//
+// Request body: {"name": "repository-name"}
+// Response: 201 Created with "repository created" message on success
 func (c *RepoController) CreateRepo(ctx *fiber.Ctx) error {
 	logger := c.Logger.With().Str("event", "CreateRepo").Logger()
 
@@ -23,6 +33,7 @@ func (c *RepoController) CreateRepo(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).SendString(err.Error())
 	}
 
+	// Normalize the repository name to ensure proper .git suffix and path format
 	normName := common.NormalizeRepoPath(req.Name)
 
 	err := c.Storage.CreateRepository(normName)
@@ -35,6 +46,10 @@ func (c *RepoController) CreateRepo(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).SendString("repository created")
 }
 
+// ListRepos handles GET requests to retrieve a list of all repositories.
+// Returns a JSON array containing the names of all repositories in the storage backend.
+//
+// Response: 200 OK with JSON array of repository names
 func (c *RepoController) ListRepos(ctx *fiber.Ctx) error {
 	logger := c.Logger.With().Str("event", "ListRepos").Logger()
 

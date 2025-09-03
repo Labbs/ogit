@@ -16,6 +16,16 @@ var (
 		HttpLogs bool
 	}
 
+	// SSH is the configuration for the SSH Git server.
+	// Enabled controls whether the SSH server starts.
+	// Port is the port on which the SSH server listens.
+	// HostKeyPath is the path to the SSH host key file.
+	SSH struct {
+		Enabled     bool
+		Port        int
+		HostKeyPath string
+	}
+
 	// Logger is the configuration for the zerolog logger.
 	// Level is the log level for the logger.
 	// Pretty enables or disables pretty printing of logs (non JSON logs).

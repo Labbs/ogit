@@ -30,5 +30,32 @@ func ServerFlags() []cli.Flag {
 				altsrcyaml.YAML("http.logs", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
 			),
 		},
+		&cli.BoolFlag{
+			Name:        "ssh.enabled",
+			Value:       false,
+			Destination: &config.SSH.Enabled,
+			Sources: cli.NewValueSourceChain(
+				cli.EnvVar("SSH_ENABLED"),
+				altsrcyaml.YAML("ssh.enabled", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
+			),
+		},
+		&cli.IntFlag{
+			Name:        "ssh.port",
+			Value:       2222,
+			Destination: &config.SSH.Port,
+			Sources: cli.NewValueSourceChain(
+				cli.EnvVar("SSH_PORT"),
+				altsrcyaml.YAML("ssh.port", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
+			),
+		},
+		&cli.StringFlag{
+			Name:        "ssh.hostkey",
+			Value:       "./ssh_host_key",
+			Destination: &config.SSH.HostKeyPath,
+			Sources: cli.NewValueSourceChain(
+				cli.EnvVar("SSH_HOST_KEY_PATH"),
+				altsrcyaml.YAML("ssh.hostkey", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
+			),
+		},
 	}
 }

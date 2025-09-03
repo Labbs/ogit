@@ -67,8 +67,17 @@ func (c *HttpConfig) NewServer() error {
 
 	err := c.Fiber.Listen(":" + strconv.Itoa(c.Port))
 	if err != nil {
-		c.Logger.Fatal().Err(err).Msg("Failed to start server")
+		c.Logger.Error().Err(err).Msg("Failed to start server")
 		return err
+	}
+	return nil
+}
+
+// Shutdown gracefully shuts down the HTTP server
+func (c *HttpConfig) Shutdown() error {
+	if c.Fiber != nil {
+		c.Logger.Info().Msg("Shutting down HTTP server")
+		return c.Fiber.Shutdown()
 	}
 	return nil
 }
