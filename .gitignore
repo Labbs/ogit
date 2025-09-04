@@ -42,3 +42,4 @@ repositories/
 main
 
 .vscode/
+ssh_host_key
