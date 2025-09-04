@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/labbs/git-server-s3/internal/config"
 	"github.com/labbs/git-server-s3/pkg/storage"
 	"github.com/rs/zerolog"
 )
@@ -17,4 +18,7 @@ func (c *Config) Configure() {
 
 	NewGitRouter(c)
 	NewRepoRouter(c)
+	if config.Debug.Endpoints {
+		NewDebugRouter(c)
+	}
 }

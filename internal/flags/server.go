@@ -57,5 +57,14 @@ func ServerFlags() []cli.Flag {
 				altsrcyaml.YAML("ssh.hostkey", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
 			),
 		},
+		&cli.BoolFlag{
+			Name:        "debug.endpoints",
+			Value:       false,
+			Destination: &config.Debug.Endpoints,
+			Sources: cli.NewValueSourceChain(
+				cli.EnvVar("DEBUG_ENDPOINTS"),
+				altsrcyaml.YAML("debug.endpoints", altsrc.NewStringPtrSourcer(&config.ConfigFile)),
+			),
+		},
 	}
 }

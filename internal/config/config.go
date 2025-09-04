@@ -26,6 +26,11 @@ var (
 		HostKeyPath string
 	}
 
+	// Debug enables or disables debug endpoints.
+	Debug struct {
+		Endpoints bool
+	}
+
 	// Logger is the configuration for the zerolog logger.
 	// Level is the log level for the logger.
 	// Pretty enables or disables pretty printing of logs (non JSON logs).
