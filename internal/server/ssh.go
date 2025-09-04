@@ -392,7 +392,7 @@ func (sc *SSHConfig) handleReceivePack(s gliderssh.Session, srv transport.Transp
 	}
 
 	logger.Info().Msg("Receive pack completed successfully")
-	
+
 	// Exit cleanly with success code
 	_ = s.Exit(0)
 }
