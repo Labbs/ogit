@@ -5,10 +5,12 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	billyos "github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/cache"
+	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/storer"
 	"github.com/go-git/go-git/v5/storage/filesystem"
 	"github.com/labbs/git-server-s3/internal/config"
@@ -74,9 +76,64 @@ func (ls *LocalStorage) CreateRepository(repoPath string) error {
 		return err
 	}
 
-	// Initialize bare repository
-	_, err := git.PlainInit(fullPath, true)
-	return err
+	// Create a temporary normal repository first to add initial commit
+	tempPath := fullPath + "_temp"
+	defer os.RemoveAll(tempPath) // Clean up temp directory
+
+	// Initialize normal (non-bare) repository
+	repo, err := git.PlainInit(tempPath, false)
+	if err != nil {
+		return err
+	}
+
+	// Get worktree to create files
+	worktree, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	// Create README.md with repository information
+	repoName := strings.TrimSuffix(filepath.Base(repoPath), ".git")
+	readmeContent := "# " + repoName + "\n\nRepository created with git-server-s3\n"
+
+	readmeFile, err := worktree.Filesystem.Create("README.md")
+	if err != nil {
+		return err
+	}
+
+	if _, err := readmeFile.Write([]byte(readmeContent)); err != nil {
+		readmeFile.Close()
+		return err
+	}
+	readmeFile.Close()
+
+	// Add README.md to staging
+	if _, err := worktree.Add("README.md"); err != nil {
+		return err
+	}
+
+	// Create initial commit
+	commit, err := worktree.Commit("Initial commit", &git.CommitOptions{
+		Author: &object.Signature{
+			Name:  "Git Server S3",
+			Email: "git-server@localhost",
+			When:  time.Now(),
+		},
+	})
+	if err != nil {
+		return err
+	}
+
+	// Now clone this repository as bare to the final location
+	_, err = git.PlainClone(fullPath, true, &git.CloneOptions{
+		URL: tempPath,
+	})
+	if err != nil {
+		return err
+	}
+
+	ls.Logger.Info().Str("commit", commit.String()).Str("repo", repoPath).Msg("Created repository with initial commit")
+	return nil
 }
 
 func (ls *LocalStorage) RepositoryExists(repoPath string) bool {
