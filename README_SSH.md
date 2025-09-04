@@ -1,5 +1,10 @@
 # SSH Git Server
 
+## WARNING
+
+The SSH support is not stable and have issues (hung up error message from git cli).
+Don't use this option for the moment and prefer HTTP.
+
 This implementation provides SSH support for Git operations alongside the existing HTTP server.
 
 ## Features
