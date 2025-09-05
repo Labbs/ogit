@@ -1,0 +1,20 @@
+http:
+  port: 8080
+  logs: true
+ssh:
+  enabled: true
+  port: 2222
+  hostkey: ./ssh_host_key
+logger:
+  level: debug
+  pretty: true
+storage:
+  type: s3 # or local
+  local:
+    path: ./repositories
+  s3:
+    bucket: git
+    endpoint: https://xxxxxxxx.com
+    access-key: xxxxxxxx
+    secret-key: xxxxxxxx
+    region: eu-west-2

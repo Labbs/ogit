@@ -30,3 +30,16 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+config.yaml
+
+# Folder used by air to store build files
+tmp/
+
+# Default local storage folder
+repositories/
+
+main
+
+.vscode/
+ssh_host_key
