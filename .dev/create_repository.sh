@@ -1,3 +1,3 @@
 #!/bin/bash
 
-curl -X POST http://localhost:8080/api/v1/repository -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzZXNzaW9uX2lkIjoiYmFjMDkyN2ItZTkzYi00NzRjLWJiYjItNWE5NGVhNGFkMjY0IiwidXNlcl9pZCI6IiIsImlzcyI6Im9naXQiLCJleHAiOjE3NjI4NTk1MDR9.PItMXV5M-GUqyWO020h847x1pmydou1HhWpFe1yXPXs" -H "Content-Type: application/json" -d '{"name": "my-repo", "description": "My first repository"}'
+curl -X POST http://localhost:8080/api/v1/repository -H "Authorization: Bearer $1" -H "Content-Type: application/json" -d '{"name": "my-repo", "description": "My first repository"}'
