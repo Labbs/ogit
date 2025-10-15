@@ -63,14 +63,6 @@ func Configure(_cfg config.Config, logger z.Logger, session application.SessionA
 		},
 	}
 
-	authMiddleware := fiberoapi.BearerTokenMiddleware(&session)
-	r.Use(fiberoapi.ConditionalAuthMiddleware(authMiddleware,
-		"/documentation",
-		"/api-spec.json",
-		"/api-spec.yaml",
-		"/health", // autres routes à exclure si nécessaire
-	))
-
 	c.FiberOapi = fiberoapi.New(r, oapiConfig)
 	c.Fiber = r
 
