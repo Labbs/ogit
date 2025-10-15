@@ -22,6 +22,7 @@ func setupSystemRoutes(deps infrastructure.Deps) {
 			Summary:     "Health check",
 			Description: "Returns the health status of the service",
 			Tags:        []string{"Health"},
+			Security:    "disabled",
 		},
 	)
 }
