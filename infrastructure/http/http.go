@@ -43,12 +43,13 @@ func Configure(_cfg config.Config, logger z.Logger, session application.SessionA
 	r.Use(requestid.New())
 
 	oapiConfig := fiberoapi.Config{
-		EnableValidation:  true,
-		EnableOpenAPIDocs: true,
-		OpenAPIDocsPath:   "/documentation",
-		OpenAPIJSONPath:   "/api-spec.json",
-		OpenAPIYamlPath:   "/api-spec.yaml",
-		AuthService:       &session,
+		EnableValidation:    true,
+		EnableOpenAPIDocs:   true,
+		OpenAPIDocsPath:     "/documentation",
+		OpenAPIJSONPath:     "/api-spec.json",
+		OpenAPIYamlPath:     "/api-spec.yaml",
+		AuthService:         &session,
+		EnableAuthorization: true,
 		SecuritySchemes: map[string]fiberoapi.SecurityScheme{
 			"bearerAuth": {
 				Type:         "http",
