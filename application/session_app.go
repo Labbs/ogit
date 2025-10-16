@@ -8,6 +8,7 @@ import (
 	fiberoapi "github.com/labbs/fiber-oapi"
 	"github.com/labbs/ogit/domain"
 	"github.com/labbs/ogit/infrastructure/config"
+	"github.com/labbs/ogit/infrastructure/helpers/tokenutil"
 	"github.com/rs/zerolog"
 )
 
@@ -50,9 +51,13 @@ func (c *SessionApp) DeleteExpired() error {
 func (c *SessionApp) ValidateToken(token string) (*fiberoapi.AuthContext, error) {
 	logger := c.Logger.With().Str("component", "application.session.validate_token").Logger()
 
-	fmt.Println(token)
+	sessionId, err := tokenutil.GetSessionIdFromToken(token, c.Config)
+	if err != nil {
+		logger.Error().Err(err).Str("token", token).Msg("failed to get session id from token")
+		return nil, fmt.Errorf("invalid token")
+	}
 
-	session, err := c.SessionPers.GetById(token)
+	session, err := c.SessionPers.GetById(sessionId)
 	if err != nil {
 		logger.Error().Err(err).Str("token", token).Msg("failed to get session by token")
 		return nil, fmt.Errorf("invalid token")
