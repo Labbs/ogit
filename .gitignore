@@ -34,3 +34,4 @@ go.work.sum
 config.yaml
 tmp/
 *sqlite*
+repositories/
