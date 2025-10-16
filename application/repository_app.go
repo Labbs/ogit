@@ -24,11 +24,12 @@ type RepositoryApp struct {
 
 func NewRepositoryApp(config config.Config, logger zerolog.Logger, repoPers domain.RepositoryPers, repositoryMemberPers domain.RepositoryMemberPers, sshKeyPers domain.SSHKeyPers, storageConfig storage.Config) *RepositoryApp {
 	return &RepositoryApp{
-		Config:        config,
-		Logger:        logger,
-		RepoPres:      repoPers,
-		SSHKeyPres:    sshKeyPers,
-		StorageConfig: storageConfig,
+		Config:               config,
+		Logger:               logger,
+		RepoPres:             repoPers,
+		SSHKeyPres:           sshKeyPers,
+		StorageConfig:        storageConfig,
+		RepositoryMemberPers: repositoryMemberPers,
 	}
 }
 
