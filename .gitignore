@@ -32,14 +32,6 @@ go.work.sum
 # .vscode/
 
 config.yaml
-
-# Folder used by air to store build files
 tmp/
-
-# Default local storage folder
+*sqlite*
 repositories/
-
-main
-
-.vscode/
-ssh_host_key

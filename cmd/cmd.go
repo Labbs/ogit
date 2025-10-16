@@ -6,19 +6,22 @@ import (
 	"log"
 	"os"
 
-	"github.com/urfave/cli/v3"
+	"github.com/labbs/ogit/interfaces/cli/migration"
+	"github.com/labbs/ogit/interfaces/cli/server"
 
-	"github.com/labbs/git-server-s3/internal/cmd"
+	"github.com/urfave/cli/v3"
 )
 
 var version = "development"
 
+// main is the entry point of the application.
+// It sets up the CLI commands and handles configuration file loading.
 func main() {
 	sources := cli.NewValueSourceChain()
 	cmd := &cli.Command{
-		Name:    "stack-deployer",
+		Name:    "oGit",
 		Version: version,
-		Usage:   "Application used to deploy vision stack",
+		Usage:   "Git server with web interface and storage in blob stores (S3, GCS, Azure, etc.)",
 		Before: func(ctx context.Context, cmd *cli.Command) (context.Context, error) {
 			config := cmd.String("config")
 			if len(config) > 0 {
@@ -34,7 +37,8 @@ func main() {
 			return ctx, nil
 		},
 		Commands: []*cli.Command{
-			cmd.NewInstance(version),
+			server.NewInstance(version),
+			migration.NewInstance(version),
 		},
 	}
 
