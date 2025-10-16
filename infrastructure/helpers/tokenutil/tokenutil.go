@@ -24,3 +24,17 @@ func CreateAccessToken(user_id, sessionId string, config config.Config) (accessT
 	}
 	return t, nil
 }
+
+func GetSessionIdFromToken(tokenString string, config config.Config) (string, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &JwtCustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.Session.SecretKey), nil
+	})
+	if err != nil {
+		return "", err
+	}
+	if claims, ok := token.Claims.(*JwtCustomClaims); ok && token.Valid {
+		return claims.SessionID, nil
+	} else {
+		return "", err
+	}
+}
