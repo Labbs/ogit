@@ -18,7 +18,9 @@ import (
 	"time"
 
 	"github.com/go-git/go-git/v5/plumbing/protocol/packp"
+	"github.com/go-git/go-git/v5/plumbing/protocol/packp/capability"
 	"github.com/labbs/git-server-s3/pkg/common"
+	git "github.com/labbs/git-server-s3/pkg/git"
 	"github.com/labbs/git-server-s3/pkg/storage"
 	"github.com/rs/zerolog"
 	"golang.org/x/crypto/ssh"
@@ -320,6 +322,8 @@ func (s *GitSSHServer) handleUploadPack(channel ssh.Channel, repoPath string, lo
 		return err
 	}
 
+	advRefs.Capabilities.Set(capability.Shallow)
+
 	// Always encode the advertised references, even if empty
 	if err := advRefs.Encode(bufferedChan); err != nil {
 		logger.Error().Err(err).Msg("Failed to encode advertised references")
@@ -343,6 +347,23 @@ func (s *GitSSHServer) handleUploadPack(channel ssh.Channel, repoPath string, lo
 		}
 		logger.Error().Err(err).Msg("Failed to decode upload pack request")
 		return err
+	}
+
+	// Intercept shallow clone / fetch requests and handle them with a custom
+	// implementation, since go-git's server does not support shallow.
+	if _, isDepth := req.Depth.(packp.DepthCommits); isDepth && !req.Depth.IsZero() {
+		st, err := s.Storage.GetStorer(repoPath)
+		if err != nil {
+			logger.Error().Err(err).Msg("Failed to get storer for shallow request")
+			return err
+		}
+		logger.Debug().Int("depth", int(req.Depth.(packp.DepthCommits))).Msg("Handling shallow upload-pack")
+		if err := git.ServeShallowUploadPack(bufferedChan, st, req); err != nil {
+			logger.Error().Err(err).Msg("Failed to serve shallow upload-pack")
+			return err
+		}
+		logger.Info().Msg("Shallow upload-pack completed")
+		return nil
 	}
 
 	// Process upload pack
